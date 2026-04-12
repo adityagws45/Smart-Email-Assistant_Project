@@ -2,6 +2,10 @@ package com.tka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -25,34 +29,39 @@ public class EmailGeneratorService {
         String prompt = buildPrompt(emailRequest);
 
         // 2. Prepare JSON body
-        String requestBody = String.format("""
-                {
-                  "contents": [
-                    {
-                      "parts": [
-                        {
-                          "text": "%s"
-                        }
-                      ]
-                    }
-                  ]
-                }
-                """, prompt);
+        ObjectMapper mapper = new ObjectMapper();
+
+String requestBody;
+try {
+    requestBody = mapper.writeValueAsString(
+        Map.of("contents", List.of(
+            Map.of("parts", List.of(
+                Map.of("text", prompt)
+            ))
+        ))
+    );
+} catch (Exception e) {
+    throw new RuntimeException(e);
+}
 
         // 3. Send request
-        String response = webClient.post()
-                .uri(uriBuilder -> uriBuilder
-                		.path("/v1beta/models/gemini-3-flash-preview:generateContent")
-                        .queryParam("key", apiKey)
-                        .build())
-                .header("Content-Type", "application/json")
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        try {
+    String response = webClient.post()
+            .uri(uriBuilder -> uriBuilder
+                    .path("/v1beta/models/gemini-3-flash-preview:generateContent")
+                    .queryParam("key", apiKey)
+                    .build())
+            .header("Content-Type", "application/json")
+            .bodyValue(requestBody)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
 
-        // 4. Extract response
-        return extractResponseContent(response);
+    return extractResponseContent(response);
+
+} catch (Exception e) {
+    return "Error generating email. Please try again.";
+}
     }
 
     private String buildPrompt(EmailRequest emailRequest) {

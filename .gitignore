@@ -24,17 +24,12 @@ lerna-debug.log*
 target/
 *.class
 
-# Maven wrapper (optional keep/remove)
-.mvn/wrapper/maven-wrapper.jar
-
 # ======================
 # 🧠 IDE FILES
 # ======================
-# VS Code
 .vscode/*
 !.vscode/extensions.json
 
-# Eclipse / STS
 .apt_generated
 .classpath
 .factorypath
@@ -43,13 +38,11 @@ target/
 .springBeans
 .sts4-cache
 
-# IntelliJ
 .idea/
 *.iws
 *.iml
 *.ipr
 
-# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -64,3 +57,9 @@ build/
 !**/src/test/**/target/
 !**/src/main/**/build/
 !**/src/test/**/build/
+
+# ======================
+# 🔐 ENV FILES
+# ======================
+.env
+.env.*

@@ -11,21 +11,38 @@ function App() {
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await axios.post("http://localhost:8080/api/email/generate", {
-       emailContent,
-       tone 
-      });
-      setGeneratedReply(typeof response.data === 'string' ? response.data : JSON.stringify(response.data));
-    } catch (error) {
-      setError('Failed to generate eamil reply. Please try again');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  setError('');
+
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/email/generate`,
+      {
+        emailContent,
+        tone
+      },
+      {
+        timeout: 10000
+      }
+    );
+
+    setGeneratedReply(
+      typeof response.data === 'string'
+        ? response.data
+        : JSON.stringify(response.data)
+    );
+
+  } catch (error) {
+    setError(
+      error.response?.data ||
+      error.message ||
+      'Failed to generate email reply'
+    );
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Container maxWidth="md" sx={{py:4}}>
