@@ -1,0 +1,66 @@
+# ======================
+# 🚀 GENERAL
+# ======================
+*.log
+logs
+.DS_Store
+
+# ======================
+# 🟨 NODE (Frontend)
+# ======================
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ======================
+# ☕ JAVA (Backend)
+# ======================
+target/
+*.class
+
+# Maven wrapper (optional keep/remove)
+.mvn/wrapper/maven-wrapper.jar
+
+# ======================
+# 🧠 IDE FILES
+# ======================
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# ======================
+# ✅ KEEP SOURCE TARGETS
+# ======================
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
