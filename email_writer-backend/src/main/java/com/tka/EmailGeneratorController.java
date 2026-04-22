@@ -7,7 +7,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/email")
 @AllArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+        origins = {
+                "https://mail.google.com",
+                "https://smart-email-assistant-project.onrender.com"
+        },
+        allowedHeaders = "*",
+        methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS}
+)
 public class EmailGeneratorController {
 
     private final EmailGeneratorService emailGeneratorService;
