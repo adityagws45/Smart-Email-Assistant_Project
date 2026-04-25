@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(
         origins = {
                 "https://mail.google.com",
-                "https://smart-email-assistant-project.onrender.com"
+                "https://smart-email-assistant-pro.onrender.com"
         },
         allowedHeaders = "*",
         methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS}
