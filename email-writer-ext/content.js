@@ -1,87 +1,54 @@
-console.log("Email Writer Extension - Content Script Loaded");
+console.log("Email Writer Extension - Loaded");
 
-/* ================= BUTTON ================= */
+const API_URL = "https://smart-email-assistant-project.onrender.com/api/email/generate";
+
+let isProcessing = false;
+
+/* ================= CREATE BUTTON ================= */
+
 function createAIButton() {
-    const button = document.createElement('div');
-    button.className = 'T-I J-J5-Ji aoO v7 T-I-atl L3';
-    button.style.marginRight = '8px';
-    button.innerHTML = 'AI Reply';
-    button.setAttribute('role', 'button');
-    button.setAttribute('data-tooltip', 'Generate AI Reply');
+    const button = document.createElement('button');
+    button.innerText = "AI Reply";
+    button.className = "ai-reply-button";
+
+    button.style.marginRight = "8px";
+    button.style.padding = "6px 12px";
+    button.style.backgroundColor = "#0b57d0";
+    button.style.color = "white";
+    button.style.border = "none";
+    button.style.borderRadius = "4px";
+    button.style.cursor = "pointer";
+
     return button;
 }
 
-/* ================= EMAIL CONTENT ================= */
+/* ================= GET EMAIL CONTENT ================= */
+
 function getEmailContent() {
-    const selectors = [
-        '.h7',
-        '.a3s.aiL',
-        '.gmail_quote',
-        '[role="presentation"]'
-    ];
+    const selectors = ['.a3s.aiL', '.h7', '.gmail_quote'];
 
-    for (const selector of selectors) {
-        const content = document.querySelector(selector);
-        if (content) {
-            return content.innerText.trim();
-        }
+    for (let sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el) return el.innerText.trim();
     }
 
-    return '';
+    return "";
 }
 
-/* ================= TOOLBAR ================= */
-function findComposeToolbar() {
-    const selectors = [
-        '.btC',
-        '.aDh',
-        '[role="toolbar"]',
-        '.gU.Up'
-    ];
+/* ================= FIND COMPOSE BOX ================= */
 
-    for (const selector of selectors) {
-        const toolbar = document.querySelector(selector);
-        if (toolbar) {
-            return toolbar;
-        }
-    }
-
-    return null;
+function findComposeBox() {
+    return document.querySelector('[role="textbox"][contenteditable="true"]');
 }
 
-/* ================= COMPOSE BOX (FINAL FIX) ================= */
-function getComposeBox() {
+/* ================= CALL API ================= */
 
-    // ✅ 1. BEST METHOD → active focused element
-    const active = document.activeElement;
-    if (active && active.getAttribute("contenteditable") === "true") {
-        return active;
-    }
-
-    // ✅ 2. Gmail specific compose box
-    const compose = document.querySelector(
-        'div[aria-label="Message Body"][role="textbox"]'
-    );
-    if (compose) return compose;
-
-    // ✅ 3. Fallback → last visible editable box
-    const all = document.querySelectorAll('[contenteditable="true"]');
-    for (const el of all) {
-        if (el.offsetHeight > 100) {
-            return el;
-        }
-    }
-
-    return null;
-}
-
-/* ================= API CALL ================= */
 async function callAPI(emailContent) {
-    const url = 'https://smart-email-assistant-project.onrender.com/api/email/generate';
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({
             emailContent,
             tone: "professional"
@@ -95,82 +62,93 @@ async function callAPI(emailContent) {
     return await response.text();
 }
 
-/* ================= INJECT BUTTON ================= */
-function injectButton() {
-    const existingButton = document.querySelector('.ai-reply-button');
-    if (existingButton) existingButton.remove();
+/* ================= INSERT TEXT ================= */
 
-    const toolbar = findComposeToolbar();
-    if (!toolbar) {
-        console.log("Toolbar not found");
+function insertText(text) {
+    const box = findComposeBox();
+
+    if (!box) {
+        alert("Compose box not found");
         return;
     }
 
-    console.log("Toolbar found, creating AI button");
+    box.focus();
+    document.execCommand("insertText", false, text);
+}
+
+/* ================= INJECT BUTTON ================= */
+
+function injectButton() {
+
+    console.log("Trying to inject button...");
+
+    // avoid duplicate
+    if (document.querySelector(".ai-reply-button")) return;
+
+    const composeBox = findComposeBox();
+
+    if (!composeBox) {
+        console.log("Compose box not found");
+        return;
+    }
+
+    // go upward to find container with buttons
+    let parent = composeBox;
+
+    for (let i = 0; i < 8; i++) {
+        parent = parent.parentElement;
+        if (!parent) break;
+
+        if (parent.querySelector('button')) {
+            console.log("Found button container");
+            break;
+        }
+    }
+
+    if (!parent) {
+        console.log("No suitable container found");
+        return;
+    }
+
+    console.log("Injecting AI button");
 
     const button = createAIButton();
-    button.classList.add('ai-reply-button');
 
-    button.addEventListener('click', async () => {
-        button.innerHTML = 'Generating...';
-        button.disabled = true;
+    button.onclick = async () => {
+
+        if (isProcessing) return;
+        isProcessing = true;
+
+        button.innerText = "Generating...";
 
         try {
             const emailContent = getEmailContent();
 
             if (!emailContent) {
-                alert("No email content found!");
+                alert("No email content found");
                 return;
             }
 
             const reply = await callAPI(emailContent);
 
-            // ⏳ IMPORTANT: Gmail needs time
-            await new Promise(res => setTimeout(res, 2500));
+            insertText(reply);
 
-            const composeBox = getComposeBox();
-
-            console.log("ACTIVE ELEMENT:", document.activeElement);
-            console.log("Compose box:", composeBox);
-
-            if (!composeBox) {
-                throw new Error("Compose box not found");
-            }
-
-            composeBox.focus();
-            document.execCommand('insertText', false, reply);
-
-        } catch (error) {
-            console.error("FINAL ERROR:", error);
-            alert(error.message || "Something went wrong");
-
+        } catch (err) {
+            console.error(err);
+            alert("Failed to generate reply");
         } finally {
-            button.innerHTML = 'AI Reply';
-            button.disabled = false;
+            button.innerText = "AI Reply";
+            isProcessing = false;
         }
-    });
+    };
 
-    toolbar.insertBefore(button, toolbar.firstChild);
+    parent.appendChild(button);
 }
 
 /* ================= OBSERVER ================= */
-const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-        const addedNodes = Array.from(mutation.addedNodes);
 
-        const hasCompose = addedNodes.some(node =>
-            node.nodeType === Node.ELEMENT_NODE &&
-            (
-                node.matches('.aDh, .btC, [role="dialog"]') ||
-                node.querySelector('.aDh, .btC, [role="dialog"]')
-            )
-        );
-
-        if (hasCompose) {
-            console.log("Compose Window Detected");
-            setTimeout(injectButton, 1000);
-        }
-    }
+const observer = new MutationObserver(() => {
+    setTimeout(injectButton, 800);
 });
 
 observer.observe(document.body, {
