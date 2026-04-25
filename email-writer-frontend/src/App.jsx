@@ -142,10 +142,27 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // ✅ Fallback API (IMPORTANT FIX)
+  // ✅ API URL (fallback included)
   const API_URL =
     import.meta.env.VITE_API_URL ||
     "https://smart-email-assistant-project.onrender.com";
+
+  // ✅ WAKE-UP FUNCTION (for Render cold start)
+  const wakeUpServer = async () => {
+    try {
+      console.log("Warming up backend...");
+      await fetch(`${API_URL}/api/email/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailContent: "Hello",
+          tone: ""
+        })
+      });
+    } catch (e) {
+      console.log("Wake-up request sent");
+    }
+  };
 
   const handleSubmit = async () => {
     console.log("Button clicked");
@@ -153,8 +170,14 @@ function App() {
 
     setLoading(true);
     setError('');
+    setGeneratedReply('');
 
     try {
+      // 🔥 Step 1: Wake up backend
+      setError("Server is waking up... please wait ⏳");
+      await wakeUpServer();
+
+      // 🔥 Step 2: Main API call
       const response = await axios.post(
         `${API_URL}/api/email/generate`,
         {
@@ -162,12 +185,13 @@ function App() {
           tone
         },
         {
-          timeout: 10000
+          timeout: 30000   // ✅ increased timeout
         }
       );
 
       console.log("Response:", response.data);
 
+      setError('');
       setGeneratedReply(
         typeof response.data === 'string'
           ? response.data
@@ -222,7 +246,7 @@ function App() {
         <Button
           variant='contained'
           onClick={handleSubmit}
-          disabled={loading}   // ✅ FIXED (removed emailContent check for testing)
+          disabled={loading}
           fullWidth
         >
           {loading ? <CircularProgress size={24} /> : "Generate Reply"}
