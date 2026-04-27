@@ -178,7 +178,8 @@ public class EmailGeneratorService {
     }
 
     // 🔥 UPDATED PROMPT (MAIN CHANGE)
-  private String buildPrompt(EmailRequest emailRequest) {
+
+private String buildPrompt(EmailRequest emailRequest) {
 
     String tone = (emailRequest.getTone() != null && !emailRequest.getTone().isEmpty())
             ? emailRequest.getTone()
@@ -188,18 +189,18 @@ public class EmailGeneratorService {
 
             "IMPORTANT:\n" +
             "- Do NOT include subject line\n" +
-            "- Keep the reply natural and human-like\n" +
-            "- If specific personal details are missing, use helpful placeholders in brackets\n" +
+            "- Do NOT include 'Subject:'\n" +
+            "- Do NOT give multiple options\n" +
+            "- Include greeting and proper closing\n" +
+            "- Use smart placeholders ONLY where specific details are missing\n" +
             "- Example placeholders:\n" +
-            "  [mention a key achievement]\n" +
-            "  [add specific detail if needed]\n" +
-            "- Do NOT use placeholders like [Your Name]\n" +
-            "- Keep it professional and realistic\n\n" +
+            "  [mention a key achievement or update]\n" +
+            "  [add a relevant detail if needed]\n" +
+            "- Do NOT use placeholders like [Your Name] or [Company Name]\n\n" +
 
             "Original Email:\n" +
             emailRequest.getEmailContent();
 }
-
 
     // 4. Extract response
     private String extractResponseContent(String response) {
