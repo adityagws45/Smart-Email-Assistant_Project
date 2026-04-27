@@ -178,34 +178,27 @@ public class EmailGeneratorService {
     }
 
     // 🔥 UPDATED PROMPT (MAIN CHANGE)
-    private String buildPrompt(EmailRequest emailRequest) {
+   private String buildPrompt(EmailRequest emailRequest) {
 
-        String tone = (emailRequest.getTone() != null && !emailRequest.getTone().isEmpty())
-                ? emailRequest.getTone()
-                : "professional";
+    String tone = (emailRequest.getTone() != null && !emailRequest.getTone().isEmpty())
+            ? emailRequest.getTone()
+            : "professional";
 
-        return "You are an AI email assistant.\n\n" +
+    return "Generate a natural and human-like email reply.\n\n" +
 
-                "Write a " + tone + " email reply to the email below.\n\n" +
+            "Use a " + tone + " tone.\n\n" +
 
-                "Tone rules:\n" +
-                "- professional: polite, formal, structured\n" +
-                "- casual: short, relaxed, simple\n\n" +
+            "IMPORTANT:\n" +
+            "- Do NOT include subject line\n" +
+            "- Do NOT include 'Subject:'\n" +
+            "- Do NOT give multiple options\n" +
+            "- Do NOT use placeholders like [Your Name] or [Company]\n" +
+            "- Make the reply realistic and conversational\n" +
+            "- Keep it clear and properly structured\n\n" +
 
-                "IMPORTANT RULES:\n" +
-                "- Do NOT include subject line\n" +
-                "- Do NOT include 'Subject:'\n" +
-                "- Generate ONLY the email body\n" +
-                "- Generate ONLY ONE reply\n" +
-                "- Do NOT give multiple options\n" +
-                "- Do NOT explain anything\n" +
-                "- Keep it concise (4-6 lines max)\n" +
-                "- Make it ready to send\n\n" +
-
-                "Email:\n" +
-                emailRequest.getEmailContent();
-    }
-
+            "Original Email:\n" +
+            emailRequest.getEmailContent();
+}
     // 4. Extract response
     private String extractResponseContent(String response) {
         try {
