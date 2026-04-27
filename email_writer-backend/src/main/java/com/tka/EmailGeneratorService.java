@@ -203,11 +203,12 @@ private String buildPrompt(EmailRequest emailRequest) {
             "- Use the sender name in closing\n" +
             "- If receiver name is missing, use [Name]\n\n" +
 
-            "Greeting format:\n" +
-            "Dear " + receiver + ",\n\n" +
 
-            "Closing format:\n" +
-            "Best regards,\n" + sender + "\n\n" +
+            "- If specific personal details are missing, use helpful placeholders in brackets\n" +
+            "- Example placeholders:\n" +
+            "  [mention a key achievement or update]\n" +
+            "  [add a specific detail if needed]\n" +
+
 
             "Original Email:\n" +
             emailRequest.getEmailContent();
