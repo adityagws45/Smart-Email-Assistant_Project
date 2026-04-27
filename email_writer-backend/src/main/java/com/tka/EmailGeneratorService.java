@@ -178,27 +178,29 @@ public class EmailGeneratorService {
     }
 
     // 🔥 UPDATED PROMPT (MAIN CHANGE)
-   private String buildPrompt(EmailRequest emailRequest) {
+  private String buildPrompt(EmailRequest emailRequest) {
 
     String tone = (emailRequest.getTone() != null && !emailRequest.getTone().isEmpty())
             ? emailRequest.getTone()
             : "professional";
 
-    return "Generate a natural and human-like email reply.\n\n" +
-
-            "Use a " + tone + " tone.\n\n" +
+    return "Generate a " + tone + " email reply for the following email.\n\n" +
 
             "IMPORTANT:\n" +
             "- Do NOT include subject line\n" +
-            "- Do NOT include 'Subject:'\n" +
-            "- Do NOT give multiple options\n" +
-            "- Do NOT use placeholders like [Your Name] or [Company]\n" +
-            "- Make the reply realistic and conversational\n" +
-            "- Keep it clear and properly structured\n\n" +
+            "- Keep the reply natural and human-like\n" +
+            "- If specific personal details are missing, use helpful placeholders in brackets\n" +
+            "- Example placeholders:\n" +
+            "  [mention a key achievement]\n" +
+            "  [add specific detail if needed]\n" +
+            "- Do NOT use placeholders like [Your Name]\n" +
+            "- Keep it professional and realistic\n\n" +
 
             "Original Email:\n" +
             emailRequest.getEmailContent();
 }
+
+
     // 4. Extract response
     private String extractResponseContent(String response) {
         try {
