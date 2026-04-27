@@ -178,12 +178,19 @@ public class EmailGeneratorService {
     }
 
     // 🔥 UPDATED PROMPT (MAIN CHANGE)
-
 private String buildPrompt(EmailRequest emailRequest) {
 
     String tone = (emailRequest.getTone() != null && !emailRequest.getTone().isEmpty())
             ? emailRequest.getTone()
             : "professional";
+
+    String receiver = (emailRequest.getReceiverName() != null && !emailRequest.getReceiverName().isEmpty())
+            ? emailRequest.getReceiverName()
+            : "[Name]";
+
+    String sender = (emailRequest.getSenderName() != null && !emailRequest.getSenderName().isEmpty())
+            ? emailRequest.getSenderName()
+            : "";
 
     return "Generate a " + tone + " email reply for the following email.\n\n" +
 
@@ -191,16 +198,23 @@ private String buildPrompt(EmailRequest emailRequest) {
             "- Do NOT include subject line\n" +
             "- Do NOT include 'Subject:'\n" +
             "- Do NOT give multiple options\n" +
-            "- Include greeting and proper closing\n" +
-            "- Use smart placeholders ONLY where specific details are missing\n" +
-            "- Example placeholders:\n" +
-            "  [mention a key achievement or update]\n" +
-            "  [add a relevant detail if needed]\n" +
-            "- Do NOT use placeholders like [Your Name] or [Company Name]\n\n" +
+            "- Include greeting and closing\n" +
+            "- Use the receiver name in greeting\n" +
+            "- Use the sender name in closing\n" +
+            "- If receiver name is missing, use [Name]\n\n" +
+
+            "Greeting format:\n" +
+            "Dear " + receiver + ",\n\n" +
+
+            "Closing format:\n" +
+            "Best regards,\n" + sender + "\n\n" +
 
             "Original Email:\n" +
             emailRequest.getEmailContent();
 }
+
+
+
 
     // 4. Extract response
     private String extractResponseContent(String response) {
